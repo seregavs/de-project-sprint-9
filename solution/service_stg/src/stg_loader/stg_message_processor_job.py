@@ -5,7 +5,7 @@ from datetime import datetime
 
 from lib.kafka_connect import KafkaConsumer, KafkaProducer
 from lib.redis import RedisClient
-from stg_loader.repository import StgRepository
+from stg_loader.repository.stg_repository import StgRepository
 
 class StgMessageProcessor:
     def __init__(self,
@@ -20,8 +20,7 @@ class StgMessageProcessor:
         self._redis = redis_client
         self._stg_repository = stg_repository
         self._logger = logger
-        self._batch_size = 100
-
+        self._batch_size = batch_size # 100
 
 
     # функция, которая будет вызываться по расписанию.
@@ -45,7 +44,7 @@ class StgMessageProcessor:
 
             user_id = order["user"]["id"]
             user = self._redis.get(user_id)
-            user_name = user["name"]
+            user_name = user["name"] # обогащение данными из key-value DB
             user_login = user["login"]
 
             restaurant_id = order['restaurant']['id']

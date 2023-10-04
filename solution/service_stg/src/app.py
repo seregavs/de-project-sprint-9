@@ -6,7 +6,7 @@ from flask import Flask
 from app_config import AppConfig
 
 from stg_loader.stg_message_processor_job import StgMessageProcessor
-from stg_loader.repository import StgRepository
+from stg_loader.repository.stg_repository import StgRepository
 import pandas as pd
 
 app = Flask(__name__)
