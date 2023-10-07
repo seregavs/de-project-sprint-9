@@ -1,7 +1,7 @@
 from datetime import datetime
 from logging import Logger
 from lib.kafka_connect import KafkaConsumer, KafkaProducer
-from dds_loader.repository.stg_repository import DdsRepository
+from dds_loader.repository.dds_repository import DdsRepository
 import uuid
 
 class DdsMessageProcessor:
@@ -89,7 +89,8 @@ class DdsMessageProcessor:
 
             # hk_order_product_pk=self._uuid(f"{order_id}#$#{prod_id}"),
             
-            # формирование сообщений для CDM-витрины
+            # формирование сообщений в Kafka для CDM-витрины
+            # эти сообщения заберет потом cdm_service
             for prod in range(payload["products"]): 
                 cdm_prd_msg = {
                     "object_id": 12121, # get unique value?

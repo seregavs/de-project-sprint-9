@@ -16,7 +16,6 @@ config = AppConfig()
 def hello_world():
     return 'healthy'
 
-
 if __name__ == '__main__':
     app.logger.setLevel(logging.ERROR)
 
