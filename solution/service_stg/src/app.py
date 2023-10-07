@@ -7,7 +7,7 @@ from app_config import AppConfig
 
 from stg_loader.stg_message_processor_job import StgMessageProcessor
 from stg_loader.repository.stg_repository import StgRepository
-import pandas as pd
+# import pandas as pd
 
 app = Flask(__name__)
 
@@ -19,10 +19,9 @@ app = Flask(__name__)
 def health():
     return 'healthy'
 
-
 if __name__ == '__main__':
     # Устанавливаем уровень логгирования в Debug, чтобы иметь возможность просматривать отладочные логи.
-    app.logger.setLevel(logging.DEBUG)
+    app.logger.setLevel(logging.ERROR)
 
     # Инициализируем конфиг. Для удобства, вынесли логику получения значений переменных окружения в отдельный класс.
     config = AppConfig()

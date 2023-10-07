@@ -9,3 +9,6 @@ from pydantic import BaseModel
 class DdsRepository:
     def __init__(self, db: PgConnect) -> None:
         self._db = db
+
+    def insert(self) -> None:
+        pass

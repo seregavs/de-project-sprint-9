@@ -4,7 +4,6 @@ from lib.kafka_connect import KafkaConsumer, KafkaProducer
 from lib.pg import PgConnect
 from lib.redis import RedisClient
 
-
 class AppConfig:
     CERTIFICATE_PATH = '/crt/YandexInternalRootCA.crt'
     DEFAULT_JOB_INTERVAL = 25
