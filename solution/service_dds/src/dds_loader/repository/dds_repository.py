@@ -110,10 +110,12 @@ class DdsRepository:
                         %(load_src)s,
                         %(hk_product_names_hashdiff)s
                     )
-                    ON CONFLICT (hk_product_names_hashdiff) DO UPDATE
+                    ON CONFLICT (h_product_pk) DO UPDATE
                     SET
+                        name = EXCLUDED.name,
                         load_dt = EXCLUDED.load_dt,
-                        load_src = EXCLUDED.load_src
+                        load_src = EXCLUDED.load_src,
+                        hk_product_names_hashdiff = EXCLUDED.hk_product_names_hashdiff
                     ;
                 """,
                     {
@@ -180,10 +182,12 @@ class DdsRepository:
                         %(load_src)s,
                         %(hk_restaurant_names_hashdiff)s
                     )
-                    ON CONFLICT (hk_restaurant_names_hashdiff) DO UPDATE
+                    ON CONFLICT (h_restaurant_pk) DO UPDATE
                     SET
+                        name = EXCLUDED.name,
                         load_dt = EXCLUDED.load_dt,
-                        load_src = EXCLUDED.load_src
+                        load_src = EXCLUDED.load_src,
+                        hk_restaurant_names_hashdiff = EXCLUDED.hk_restaurant_names_hashdiff
                     ;
                 """,
                     {
@@ -253,10 +257,13 @@ class DdsRepository:
                         %(load_src)s,
                         %(hk_user_names_hashdiff)s
                     )
-                    ON CONFLICT (hk_user_names_hashdiff) DO UPDATE
+                    ON CONFLICT (h_user_pk) DO UPDATE
                     SET
+                        username = EXCLUDED.username,
+                        userlogin = EXCLUDED.userlogin,                        
                         load_dt = EXCLUDED.load_dt,
-                        load_src = EXCLUDED.load_src
+                        load_src = EXCLUDED.load_src,
+                        hk_user_names_hashdiff = EXCLUDED.hk_user_names_hashdiff
                     ;
                 """,
                     {
@@ -332,10 +339,12 @@ class DdsRepository:
                         %(load_src)s,
                         %(hk_order_status_hashdiff)s
                     )
-                    ON CONFLICT (hk_order_status_hashdiff) DO UPDATE
+                    ON CONFLICT (h_order_pk) DO UPDATE
                     SET
+                        status = EXCLUDED.status,
                         load_dt = EXCLUDED.load_dt,
-                        load_src = EXCLUDED.load_src
+                        load_src = EXCLUDED.load_src,
+                        hk_order_status_hashdiff = EXCLUDED.hk_order_status_hashdiff
                     ;
                 """,
                     {
@@ -365,10 +374,13 @@ class DdsRepository:
                         %(load_src)s,
                         %(hk_order_cost_hashdiff)s
                     )
-                    ON CONFLICT (hk_order_cost_hashdiff) DO UPDATE
+                    ON CONFLICT (h_order_pk) DO UPDATE
                     SET
+                        cost = EXCLUDED.cost,
+                        payment = EXCLUDED.payment,
                         load_dt = EXCLUDED.load_dt,
-                        load_src = EXCLUDED.load_src
+                        load_src = EXCLUDED.load_src,
+                        hk_order_cost_hashdiff = EXCLUDED.hk_order_cost_hashdiff
                     ;
                 """,
                     {
