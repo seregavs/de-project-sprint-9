@@ -8,6 +8,7 @@ def error_callback(err):
     print('Something went wrong: {}'.format(err))
 
 
+# Не обязательный класс в этом сервисе, т.к. не сохраняет в kafka-топик
 class KafkaProducer:
     def __init__(self, host: str, port: int, user: str, password: str, topic: str, cert_path: str) -> None:
         params = {

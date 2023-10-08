@@ -68,7 +68,6 @@ class StgMessageProcessor:
             self._producer.produce(dst_msg)
             self._logger.info(f"{datetime.utcnow()}. Message Sent")
 
-
         # Пишем в лог, что джоб успешно завершен.
         self._logger.info(f"{datetime.utcnow()}: FINISH1")
 
