@@ -91,7 +91,18 @@ class DdsMessageProcessor:
             
             # формирование сообщений в Kafka для CDM-витрины
             # эти сообщения заберет потом cdm_service
+            with payload["restaurant"] as pr:
+                self._dds_repository.restaurant_insert(pr["id"], pr["name"])
+
+            with payload['user'] as pu:
+                self._dds_repository.user_insert(pu["id"], pu["login"], pu["name"])
+
             for prod in range(payload["products"]): 
+
+                self._dds_repository.category_insert(prod["category"])
+                self._dds_repository.product_insert(prod["id"],prod["name"])
+
+
                 cdm_prd_msg = {
                     "object_id": 12121, # get unique value?
                     "object_type": "user_prod",
@@ -103,7 +114,7 @@ class DdsMessageProcessor:
                     }
                 }
                 self._producer.produce(cdm_prd_msg)
-                self._logger.info(f"{datetime.utcnow()}. Message cdm_prd_msg Sent")
+                self._logger.info(f"{datetime.utcnow()}. Message cdm_prd_msg sent")
 
                 cdm_categ_msg = {
                     "object_id": 12121, # get unique value?
@@ -116,7 +127,7 @@ class DdsMessageProcessor:
                     }
                 }
                 self._producer.produce(cdm_categ_msg)
-                self._logger.info(f"{datetime.utcnow()}. Message cdm_categ_msg Sent")
+                self._logger.info(f"{datetime.utcnow()}. Message cdm_categ_msg sent")
 
             # CREATE TABLE cdm.user_product_counters (
             # 	id serial4 NOT NULL,
