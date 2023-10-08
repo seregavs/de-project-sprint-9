@@ -22,7 +22,6 @@ class StgMessageProcessor:
         self._logger = logger
         self._batch_size = batch_size # 100
 
-
     # функция, которая будет вызываться по расписанию.
     def run(self) -> None:
         # Пишем в лог, что джоб был запущен.

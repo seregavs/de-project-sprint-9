@@ -34,6 +34,7 @@ class PgConnect:
     @contextmanager
     def connection(self) -> Generator[Connection, None, None]:
         conn = psycopg.connect(self.url())
+        conn.autocommit = True
         try:
             yield conn
             conn.commit()

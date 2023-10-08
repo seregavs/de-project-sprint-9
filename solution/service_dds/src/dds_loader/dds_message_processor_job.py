@@ -64,15 +64,6 @@ class DdsMessageProcessor:
             
             self._logger.info(f"{datetime.utcnow()}: Message received") 
             payload = msg['payload'] 
-            # upsert данных в кучу таблиц Data Vault
-            # ...
-            # CREATE TABLE dds.h_category (
-            #     h_category_pk uuid NOT NULL,
-            #     category_name varchar NOT NULL,
-            #     load_dt timestamp NOT NULL,
-            #     load_src varchar NOT NULL,
-            #     CONSTRAINT h_category_pk PRIMARY KEY (h_category_pk)
-            # );
 
             # class OrderDdsBuilder:
             #     def __init__(self, dict: Dict) -> None:
@@ -93,18 +84,21 @@ class DdsMessageProcessor:
             # эти сообщения заберет потом cdm_service
             with payload["restaurant"] as pr:
                 self._dds_repository.restaurant_insert(pr["id"], pr["name"])
-
-            with payload['user'] as pu:
-                self._dds_repository.user_insert(pu["id"], pu["login"], pu["name"])
+            with payload["user"] as pu:
+                self._dds_repository.user_insert(pu["id"], pu["login"], pu["name"]) 
+            self._dds_repository.order_insert(payload["id"], payload["date"], payload["cost"], payload["payment"],payload["status"])
+            self._dds_repository.order_user_insert(payload["id"], payload["user"]["id"])
 
             for prod in range(payload["products"]): 
 
                 self._dds_repository.category_insert(prod["category"])
                 self._dds_repository.product_insert(prod["id"],prod["name"])
-
+                self._dds_repository.product_category_insert(prod["id"],prod["category"])
+                self._dds_repository.order_product_insert(payload["id"],prod["id"])
+                self._dds_repository.product_restaurant_insert(prod["id"],payload["restaurant"]["id"])
 
                 cdm_prd_msg = {
-                    "object_id": 12121, # get unique value?
+                    "object_id": msg["object_id"],
                     "object_type": "user_prod",
                     "payload": {
                         "user_id": payload["user"]["id"],
@@ -117,31 +111,16 @@ class DdsMessageProcessor:
                 self._logger.info(f"{datetime.utcnow()}. Message cdm_prd_msg sent")
 
                 cdm_categ_msg = {
-                    "object_id": 12121, # get unique value?
+                    "object_id": msg["object_id"],
                     "object_type": "user_categ",
                     "payload": {
                         "user_id": payload["user"]["id"],
-                        "category_id": 1, # need to get h_category_pk from table dds.h_category
+                        "category_id": self._dds_repository.getCategory_id(prod["category"]),
                         "category_name": prod["category"],
                         "order_cnt": 1
                     }
                 }
                 self._producer.produce(cdm_categ_msg)
                 self._logger.info(f"{datetime.utcnow()}. Message cdm_categ_msg sent")
-
-            # CREATE TABLE cdm.user_product_counters (
-            # 	id serial4 NOT NULL,
-            # 	user_id int8 NOT NULL,
-            # 	product_id int8 NOT NULL,
-            # 	product_name varchar(100) NOT NULL,
-            # 	order_cnt int4 NOT NULL,
-
-
-            # CREATE TABLE cdm.user_category_counters (
-            # 	id serial4 NOT NULL,
-            # 	user_id int8 NOT NULL,
-            # 	category_id int8 NOT NULL,
-            # 	category_name varchar(100) NOT NULL,
-            # 	order_cnt int4 NOT NULL,         
 
         self._logger.info(f"{datetime.utcnow()}: FINISH2")
