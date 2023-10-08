@@ -11,7 +11,6 @@ app = Flask(__name__)
 
 config = AppConfig()
 
-
 @app.get('/health')
 def hello_world():
     return 'healthy'

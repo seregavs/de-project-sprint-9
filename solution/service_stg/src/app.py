@@ -7,10 +7,8 @@ from app_config import AppConfig
 
 from stg_loader.stg_message_processor_job import StgMessageProcessor
 from stg_loader.repository.stg_repository import StgRepository
-# import pandas as pd
 
 app = Flask(__name__)
-
 
 # Заводим endpoint для проверки, поднялся ли сервис.
 # Обратиться к нему можно будет GET-запросом по адресу localhost:5000/health.
