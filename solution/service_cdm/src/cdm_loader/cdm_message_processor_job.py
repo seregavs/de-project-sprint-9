@@ -1,7 +1,7 @@
 from datetime import datetime
 from logging import Logger
 from lib.kafka_connect import KafkaConsumer
-from cdm_loader.repository.cdm_repository import CdmRepository
+from cdm_loader.repository.cdm_rep2 import CdmRepository, CdmBuilder
 
 class CdmMessageProcessor:
     def __init__(self,
@@ -22,17 +22,12 @@ class CdmMessageProcessor:
                 break
             
             self._logger.info(f"{datetime.utcnow()}: Message received") 
-            payload = msg['payload'] 
+
+            cdm_data = CdmBuilder(msg["payload"] )
             cdm = msg["object_type"]
             if cdm == "user_prod":
-               self._cdm_repository.user_product_insert(payload["user_id"], \
-                                                        payload["product_id"], \
-                                                        payload["product_name"], \
-                                                        payload["order_cnt"] )
+               self._cdm_repository.user_product_insert(cdm_data.user_product_counters())
             elif cdm == "user_categ":
-               self._cdm_repository.user_category_insert(payload["user_id"], \
-                                                         payload["category_id"], \
-                                                         payload["category_name"], \
-                                                         payload["order_cnt"] )
+               self._cdm_repository.user_category_insert(cdm_data.user_category_counters())
 
         self._logger.info(f"{datetime.utcnow()}: FINISH3")

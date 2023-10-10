@@ -109,7 +109,7 @@ class OrderDdsBuilder:
 
     def _uuid(self, obj: Any) -> uuid.UUID:
         return uuid.uuid5(namespace=self.order_ns_uuid, name=str(obj))
-    
+     
     def h_order(self) -> H_Order:
         order_id = self._dict['id']
         return H_Order(
@@ -281,7 +281,38 @@ class OrderDdsBuilder:
                 )
             )
         return l_pc
-
+    
+    def cdm_prd_msg(self) -> List[Dict]:
+        msg = []
+        for prod_dict in self._dict['products']:
+            prd_msg = {}
+            prd_msg["object_id"] = self._dict["id"]
+            prd_msg["object_type"] = 'user_prod'
+            pl = {}
+            pl["user_id"] = self.h_user().user_id
+            pl["product_id"] = prod_dict['id']
+            pl["product_name"] = prod_dict["name"]
+            pl["order_cnt"] = 1
+            prd_msg["payload"] = pl
+            msg.append(prd_msg)
+        return msg
+    
+    def cdm_categ_msg(self) -> List[Dict]:
+        msg = []
+        for prod_dict in self._dict['products']:
+            prd_msg = {}
+            prd_msg["object_id"] = self._dict["id"]
+            prd_msg["object_type"] = 'user_categ'
+            pl = {}
+            pl["user_id"] = self.h_user().user_id
+            pl["category_id"] = self._uuid(prod_dict["category"])
+            pl["category_name"] = prod_dict["category"]
+            pl["order_cnt"] = 1
+            prd_msg["payload"] = pl
+            msg.append(prd_msg)
+        return msg
+    
+#  DdsRepository class declaration 
 class DdsRepository:
     def init(self, db: PgConnect) -> None:
         self._db = db
@@ -517,17 +548,200 @@ class DdsRepository:
                     }
                 ) 
 
-#  H_User
+    def s_restaurant_names_insert(self, obj: S_Restaurant_Names) -> None:
+        with self._db.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                        INSERT INTO dds.s_restaurant_names(
+                            h_restaurant_pk,
+                            name,
+                            load_dt,
+                            load_src,
+                            hk_restaurant_names_hashdiff
+                        )
+                        VALUES(
+                            %(h_restaurant_pk)s,
+                            %(name)s,
+                            %(load_dt)s,
+                            %(load_src)s,
+                            %(hk_restaurant_names_hashdiff)s
+                        )
+                        ON CONFLICT (h_restaurant_pk) DO NOTHING;
+                    """,
+                    {
+                        'h_restaurant_pk': obj.h_restaurant_pk,
+                        'name': obj.name,
+                        'load_dt': obj.load_dt,
+                        'load_src': obj.load_src,
+                        'hk_restaurant_names_hashdiff': obj.hk_restaurant_names_hashdiff
+                    }
+                ) 
+
+    def s_user_names_insert(self, obj: S_User_Names) -> None:
+        with self._db.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                        INSERT INTO dds.s_user_names(
+                            h_user_pk,
+                            username,
+                            userlogin,
+                            load_dt,
+                            load_src,
+                            hk_user_names_hashdiff
+                        )
+                        VALUES(
+                            %(h_user_pk)s,
+                            %(username)s,
+                            %(userlogin)s,
+                            %(load_dt)s,
+                            %(load_src)s,
+                            %(hk_user_names_hashdiff)s
+                        )
+                        ON CONFLICT (h_user_pk) DO NOTHING;
+                    """,
+                    {
+                        'h_user_pk': obj.h_user_pk,
+                        'username': obj.username,
+                        'userlogin': obj.userlogin,
+                        'load_dt': obj.load_dt,
+                        'load_src': obj.load_src,
+                        'hk_user_names_hashdiff': obj.hk_user_names_hashdiff
+                    }
+                ) 
+
+    def l_product_restaurant_insert(self, obj: L_Product_Restaurant) -> None:
+        with self._db.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                        INSERT INTO dds.l_product_restaurant(
+                            hk_product_restaurant_pk,
+                            h_restaurant_pk,
+                            h_product_pk,
+                            load_dt,
+                            load_src
+                        )
+                        VALUES(
+                            %(hk_product_restaurant_pk)s,
+                            %(h_restaurant_pk)s,
+                            %(h_product_pk)s,
+                            %(load_dt)s,
+                            %(load_src)s
+                        )
+                        ON CONFLICT (hk_product_restaurant_pk) DO NOTHING;
+                    """,
+                    {
+                        'hk_product_restaurant_pk': obj.hk_product_restaurant_pk,
+                        'h_restaurant_pk': obj.h_restaurant_pk,
+                        'h_product_pk': obj.h_product_pk,
+                        'load_dt': obj.load_dt,
+                        'load_src': obj.load_src
+                    }
+                )
+
+    def l_order_product_insert(self, obj: L_Order_Product) -> None:
+        with self._db.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                        INSERT INTO dds.l_order_product(
+                            hk_order_product_pk,
+                            h_order_pk,
+                            h_product_pk,
+                            load_dt,
+                            load_src
+                        )
+                        VALUES(
+                            %(hk_order_product_pk)s,
+                            %(h_order_pk)s,
+                            %(h_product_pk)s,
+                            %(load_dt)s,
+                            %(load_src)s
+                        )
+                        ON CONFLICT (hk_order_product_pk) DO NOTHING;
+                    """,
+                    {
+                        'hk_order_product_pk': obj.hk_order_product_pk,
+                        'h_order_pk': obj.h_order_pk,
+                        'h_product_pk': obj.h_product_pk,
+                        'load_dt': obj.load_dt,
+                        'load_src': obj.load_src
+                    }
+                )
+
+    def l_order_user_insert(self, obj: L_Order_User) -> None:
+        with self._db.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                        INSERT INTO dds.l_order_user(
+                            hk_order_user_pk,
+                            h_order_pk,
+                            h_user_pk,
+                            load_dt,
+                            load_src
+                        )
+                        VALUES(
+                            %(hk_order_user_pk)s,
+                            %(h_order_pk)s,
+                            %(h_user_pk)s,
+                            %(load_dt)s,
+                            %(load_src)s
+                        )
+                        ON CONFLICT (hk_order_user_pk) DO NOTHING;
+                    """,
+                    {
+                        'hk_order_user_pk': obj.hk_order_user_pk,
+                        'h_order_pk': obj.h_order_pk,
+                        'h_user_pk': obj.h_user_pk,
+                        'load_dt': obj.load_dt,
+                        'load_src': obj.load_src
+                    }
+                )
+
+    def l_product_category_insert(self, obj: L_Product_Category) -> None:
+        with self._db.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                        INSERT INTO dds.l_product_category(
+                            hk_product_category_pk,
+                            h_category_pk,
+                            h_product_pk,
+                            load_dt,
+                            load_src
+                        )
+                        VALUES(
+                            %(hk_product_category_pk)s,
+                            %(h_category_pk)s,
+                            %(h_product_pk)s,
+                            %(load_dt)s,
+                            %(load_src)s
+                        )
+                        ON CONFLICT (hk_product_category_pk) DO NOTHING;
+                    """,
+                    {
+                        'hk_product_category_pk': obj.hk_product_category_pk,
+                        'h_category_pk': obj.h_category_pk,
+                        'h_product_pk': obj.h_product_pk,
+                        'load_dt': obj.load_dt,
+                        'load_src': obj.load_src
+                    }
+                )
+
+#   H_User
 #  H_Product
 #  H_Category
-#  H_Restaurant
-#  H_Order
-#  S_Order_Status
-#  S_Order_Cost
+#   H_Restaurant
+#   H_Order
+#   S_Order_Status
+#   S_Order_Cost
 #  S_Product_Names
-# S_Restaurant_Names
-# S_User_Names
-# L_Product_Restaurant
-# L_Order_Product
-# L_Order_User
-# L_Product_Category
+#   S_Restaurant_Names
+#   S_User_Names
+#  L_Product_Restaurant
+#  L_Order_Product
+#  L_Order_User
+#  L_Product_Category

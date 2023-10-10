@@ -5,7 +5,7 @@ from flask import Flask
 
 from app_config import AppConfig
 from cdm_loader.cdm_message_processor_job import CdmMessageProcessor
-from cdm_loader.repository.cdm_repository import CdmRepository
+from cdm_loader.repository.cdm_rep2 import CdmRepository
 
 app = Flask(__name__)
 

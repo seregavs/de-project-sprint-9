@@ -1,3 +1,9 @@
+10-10-2023
+Исправленный код получился ни разу не компактнее :)
+Хотя, конечно, правильней. И более удобный для автогенерации. Жаль, я не нашел инструментов для автогенерации, поэтому пришлось вручную писать и отлаживать.
+
+
+=========================
 В requirements.txt лучше указывать конкретные версии для которых код запускался. Это связано с тем, что по умолчанию устанавливается последняя версия и это может привести в неработоспособности кода, например, если было изменение синтаксиса, доступных методов и т. д.
 Подробнее: https://learnpython.com/blog/python-requirements-file/
 ==================
@@ -111,3 +117,48 @@ kafka-topics:
 в 3-м сервисе метод run получает сообщение, определяет, в какую cdm-витрину ее записать и записывает.
 
 Dashboard не сделал. Времени не хватает :(
+
+# ================= old implementation =================== #
+
+            # with payload["restaurant"] as pr:
+            #     self._dds_repository.restaurant_insert(pr["id"], pr["name"])
+            # with payload["user"] as pu:
+            #     self._dds_repository.user_insert(pu["id"], pu["login"], pu["name"]) 
+            # self._dds_repository.order_insert(payload["id"], payload["date"], payload["cost"], payload["payment"],payload["status"])
+            # self._dds_repository.order_user_insert(payload["id"], payload["user"]["id"])
+            # for prod in range(payload["products"]): 
+
+            #     # self._dds_repository.category_insert(prod["category"])
+            #     # self._dds_repository.product_insert(prod["id"],prod["name"])
+            #     # self._dds_repository.product_category_insert(prod["id"],prod["category"])
+            #     # self._dds_repository.order_product_insert(payload["id"],prod["id"])
+            #     # self._dds_repository.product_restaurant_insert(prod["id"],payload["restaurant"]["id"])
+
+            #     cdm_prd_msg = 
+            #     self._producer.produce(cdm_prd_msg)
+            #     self._logger.info(f"{datetime.utcnow()}. Message cdm_prd_msg sent")
+
+            #     cdm_categ_msg = {
+            #         "object_id": msg["object_id"],
+            #         "object_type": "user_categ",
+            #         "payload": {
+            #             "user_id": payload["user"]["id"],
+            #             "category_id": self._dds_repository.getCategory_id(prod["category"]),
+            #             "category_name": prod["category"],
+            #             "order_cnt": 1
+            #         }
+            #     }
+            #     self._producer.produce(cdm_categ_msg)
+            #     self._logger.info(f"{datetime.utcnow()}. Message cdm_categ_msg sent")
+
+# ================ =====================
+            if cdm == "user_prod":
+               self._cdm_repository.user_product_insert(payload["user_id"], \
+                                                        payload["product_id"], \
+                                                        payload["product_name"], \
+                                                        payload["order_cnt"] )
+            elif cdm == "user_categ":
+               self._cdm_repository.user_category_insert(payload["user_id"], \
+                                                         payload["category_id"], \
+                                                         payload["category_name"], \
+                                                         payload["order_cnt"] )

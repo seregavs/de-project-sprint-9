@@ -1,7 +1,7 @@
 from datetime import datetime
 from logging import Logger
 from lib.kafka_connect import KafkaConsumer, KafkaProducer
-from dds_loader.repository.dds_repository import DdsRepository
+from dds_loader.repository.dds_rep2 import DdsRepository, OrderDdsBuilder
 
 class DdsMessageProcessor:
     def __init__(self,
@@ -25,47 +25,43 @@ class DdsMessageProcessor:
                 break
             
             self._logger.info(f"{datetime.utcnow()}: Message received") 
-            payload = msg['payload'] 
 
-            with payload["restaurant"] as pr:
-                self._dds_repository.restaurant_insert(pr["id"], pr["name"])
-            with payload["user"] as pu:
-                self._dds_repository.user_insert(pu["id"], pu["login"], pu["name"]) 
-            self._dds_repository.order_insert(payload["id"], payload["date"], payload["cost"], payload["payment"],payload["status"])
-            self._dds_repository.order_user_insert(payload["id"], payload["user"]["id"])
+            oddsb = OrderDdsBuilder(msg['payload'])
 
-            for prod in range(payload["products"]): 
+            with self._dds_repository as dr:
+                dr.h_order_insert(oddsb.h_order())
+                dr.h_restaurant_insert(oddsb.h_restaurant())
+                dr.h_user_insert(oddsb.h_user())
+                dr.s_order_cost_insert(oddsb.s_order_cost())
+                dr.s_order_status_insert(oddsb.s_order_status())
+                dr.s_restaurant_names_insert(oddsb.s_restaurant_names())
+                dr.s_user_names_insert(oddsb.s_user_names())
+                dr.l_order_user_insert(oddsb.l_order_user())
 
-                self._dds_repository.category_insert(prod["category"])
-                self._dds_repository.product_insert(prod["id"],prod["name"])
-                self._dds_repository.product_category_insert(prod["id"],prod["category"])
-                self._dds_repository.order_product_insert(payload["id"],prod["id"])
-                self._dds_repository.product_restaurant_insert(prod["id"],payload["restaurant"]["id"])
+                for p in oddsb.h_product():
+                    dr.h_product_insert(p)
 
-                cdm_prd_msg = {
-                    "object_id": msg["object_id"],
-                    "object_type": "user_prod",
-                    "payload": {
-                        "user_id": payload["user"]["id"],
-                        "product_id": prod["id"],
-                        "product_name": prod["name"],
-                        "order_cnt": 1
-                    }
-                }
-                self._producer.produce(cdm_prd_msg)
-                self._logger.info(f"{datetime.utcnow()}. Message cdm_prd_msg sent")
+                for c in oddsb.h_category():
+                    dr.h_category_insert(c)
+                
+                for pn in oddsb.s_product_names():
+                    dr.s_product_names_insert(pn)
 
-                cdm_categ_msg = {
-                    "object_id": msg["object_id"],
-                    "object_type": "user_categ",
-                    "payload": {
-                        "user_id": payload["user"]["id"],
-                        "category_id": self._dds_repository.getCategory_id(prod["category"]),
-                        "category_name": prod["category"],
-                        "order_cnt": 1
-                    }
-                }
-                self._producer.produce(cdm_categ_msg)
-                self._logger.info(f"{datetime.utcnow()}. Message cdm_categ_msg sent")
+                for pr in oddsb.l_product_restaurant():
+                    dr.l_product_restaurant_insert(pr)
+
+                for op in oddsb.l_order_product():
+                    dr.l_order_product_insert(op)
+
+                for pc in oddsb.l_product_category():
+                    dr.l_product_category_insert(pc)
+
+            for pl in oddsb.cdm_prd_msg():
+                self._producer.produce(pl)
+                self._logger.info(f"{datetime.utcnow()}. Message cdm_prd_msg sent") 
+
+            for pl in oddsb.cdm_categ_msg():
+                self._producer.produce(pl)
+                self._logger.info(f"{datetime.utcnow()}. Message cdm_categ_msg sent")                      
 
         self._logger.info(f"{datetime.utcnow()}: FINISH2")
